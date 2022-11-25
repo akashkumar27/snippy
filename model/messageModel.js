@@ -17,7 +17,7 @@ const messageSchema = new mongoose.Schema(
         username: String,
         isBroadcast: Boolean,
         img: {
-            type: String
+            type: mongoose.Schema.Types.ObjectId
         }
     },
     {

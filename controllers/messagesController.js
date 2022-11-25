@@ -1,29 +1,21 @@
 const messageModel = require("../model/messageModel");
 const userModel = require("../model/userModel");
+const uploadFiles = require("../middleware/uploadFile")
 
 
 module.exports.addMessage = async (req, res, next) => {
     try {
+        await uploadFiles(req, res);
+
         const { from, to, message, isBroadcast, username } = req.body;
-
-        // const userid = from.toString();
-
-        // userModel.findOne({userid},(err,value)=>{
-        //     if(!err){
-        //         let username1 =  value.username;
-        //         console.log(username1)
-        //     }
-        // })
-
-        //console.log(userid)
-        //console.log(username1)
 
         const data = await messageModel.create({
             message: { text: message },
             users: [from, to],
             sender: from,
             isBroadcast: isBroadcast,
-            username: username
+            username: username,
+            img: req.file !== undefined ? req.file.id : null
         })
         if (data)
             return res.json({ msg: "Message added successfully" })
