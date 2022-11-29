@@ -14,19 +14,24 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
 
-
 app.use("/api/auth", userRoutes)
 app.use("/api/messages", messageRoute)
-
-const connect = mongoose.connect(process.env.MONGO_URL).then(() => {
+let _db;
+let server;
+mongoose.connect(process.env.MONGO_URL).then((client) => {
+    _db = client.connection.db;
     console.log("DB connection successfull")
+    server = app.listen(process.env.PORT, () => {
+        console.log(`Server started on ${process.env.PORT}`)
+    })
 }).catch((err) => {
     console.log(err.message)
 })
 
-const server = app.listen(process.env.PORT, () => {
-    console.log(`Server started on ${process.env.PORT}`)
-})
+const getDatabase = () => {
+    if (_db) return _db;
+    else throw "No database found"
+}
 
 const io = socket(server, {
     cors: {
@@ -47,8 +52,10 @@ io.on("connection", (socket) => {
     socket.on("send-msg", (data) => {
         const sendUserSocket = onlineUsers.get(data.to)
         if (sendUserSocket) {
+
             socket.to(sendUserSocket).emit("msg-receive", data.message)
         }
     })
 })
 
+module.exports.getDatabase = getDatabase;

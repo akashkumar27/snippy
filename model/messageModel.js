@@ -5,7 +5,6 @@ const messageSchema = new mongoose.Schema(
         message: {
             text: {
                 type: String,
-                required: true
             },
         },
         users: Array,
@@ -17,7 +16,12 @@ const messageSchema = new mongoose.Schema(
         username: String,
         isBroadcast: Boolean,
         img: {
-            type: mongoose.Schema.Types.ObjectId
+            filename: {
+                type: String,
+            },
+            fileId: {
+                type: String,
+            },
         }
     },
     {

@@ -10,20 +10,20 @@ module.exports.addMessage = async (req, res, next) => {
         const { from, to, message, isBroadcast, username } = req.body;
 
         const data = await messageModel.create({
-            message: { text: message },
+            message: { text: `${message}` },
             users: [from, to],
             sender: from,
             isBroadcast: isBroadcast,
             username: username,
-            img: req.file !== undefined ? req.file.id : null
+            img: req.file !== undefined ? { filename: req.file.filename, fileId: req.file.id } : null
         })
         if (data)
-            return res.json({ msg: "Message added successfully" })
+            return res.json({ msg: "Message added successfully", filename: req.file !== undefined ? req.file.filename : null })
         else
             return res.json({ msg: "Failed to add message to the database" })
     }
     catch (err) {
-        next(err)
+        console.log(err)
     }
 }
 
@@ -44,11 +44,13 @@ module.exports.getAllMessage = async (req, res, next) => {
 
 
         const projectedMessages = messages.map((msg) => {
+
             return {
                 sender: msg.sender,
                 fromSelf: msg.sender.toString() === from,
                 message: msg.message.text,
-                username: msg.username
+                username: msg.username,
+                image: msg.img !== null ? msg.img?.filename : null
             }
         })
         res.json(projectedMessages)
