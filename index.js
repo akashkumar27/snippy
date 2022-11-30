@@ -6,6 +6,7 @@ const mongoose = require("mongoose")
 const userRoutes = require("./routes/userRoutes")
 const messageRoute = require("./routes/messagesRoutes")
 const socket = require("socket.io")
+const crypto = require("crypto")
 
 const app = express()
 require("dotenv").config()
@@ -16,27 +17,19 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", userRoutes)
 app.use("/api/messages", messageRoute)
-let _db;
-let server;
+
 mongoose.connect(process.env.MONGO_URL).then((client) => {
-    _db = client.connection.db;
     console.log("DB connection successfull")
-    server = app.listen(process.env.PORT, () => {
-        console.log(`Server started on ${process.env.PORT}`)
-    })
 }).catch((err) => {
     console.log(err.message)
 })
-
-const getDatabase = () => {
-    if (_db) return _db;
-    else throw "No database found"
-}
+const server = app.listen(process.env.PORT, () => {
+    console.log(`Server started on ${process.env.PORT}`)
+})
 
 const io = socket(server, {
     cors: {
-        origin: "http://localhost:3000",
-        credentials: true,
+        origin: "*",
     }
 })
 
@@ -51,11 +44,13 @@ io.on("connection", (socket) => {
 
     socket.on("send-msg", (data) => {
         const sendUserSocket = onlineUsers.get(data.to)
-        if (sendUserSocket) {
-
-            socket.to(sendUserSocket).emit("msg-receive", data.message)
+        const isBroadcast = data.isBroadcast;
+        if (sendUserSocket || isBroadcast) {
+            if (isBroadcast === true) {
+                socket.broadcast.emit("msg-receive", { message: data.message, image: data.image, username: data.username });
+            }
+            else
+                socket.to(sendUserSocket).emit("msg-receive", { message: data.message, image: data.image })
         }
     })
 })
-
-module.exports.getDatabase = getDatabase;
