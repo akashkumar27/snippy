@@ -1,11 +1,12 @@
 const { addMessage, getAllMessage } = require("../controllers/messagesController");
 const router = require("express").Router();
 const mongoose = require('mongoose');
+require("dotenv").config()
 
 router.post("/addmsg", addMessage)
 router.post("/getmsg", getAllMessage);
 router.get("/getPhotos/:filename", async (req, res, next) => {
-    const connect = mongoose.createConnection("mongodb://localhost:27017/chat-app", { useNewUrlParser: true, useUnifiedTopology: true });
+    const connect = mongoose.createConnection(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true });
     let gfs;
 
     connect.once('open', async () => {

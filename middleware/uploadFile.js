@@ -4,9 +4,11 @@ const { GridFsStorage } = require("multer-gridfs-storage");
 const { resolve } = require("path");
 const crypto = require("crypto");
 const path = require("path");
+require("dotenv").config()
+
 
 var storage = new GridFsStorage({
-    url: "mongodb://localhost:27017/chat-app",
+    url: process.env.MONGO_URL,
     options: { useNewUrlParser: true, useUnifiedTopology: true },
     file: (req, file) => {
         return new Promise((resolve, reject) => {

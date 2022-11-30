@@ -6,7 +6,6 @@ const mongoose = require("mongoose")
 const userRoutes = require("./routes/userRoutes")
 const messageRoute = require("./routes/messagesRoutes")
 const socket = require("socket.io")
-const crypto = require("crypto")
 
 const app = express()
 require("dotenv").config()
